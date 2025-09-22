@@ -15,17 +15,17 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public UserInformationResponse getUserDtoByUserId(Long id) {
-        ApplicationUser user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    public UserInformationResponse getUserDtoByUserId(Long userId) {
+        ApplicationUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         return UserInformationResponse.mapToDto(user);
     }
 
     @Transactional
-    public UserInformationResponse updateUserProfile(Long id, UpdateProfileRequest request) {
-        ApplicationUser user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    public UserInformationResponse updateUserProfile(Long userId, UpdateProfileRequest request) {
+        ApplicationUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
