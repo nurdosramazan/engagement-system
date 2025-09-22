@@ -17,4 +17,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByApplicantId(Long applicantId);
 
     boolean existsByApplicantIdAndStatusIn(Long applicantId, List<AppointmentStatus> statuses);
+
+    @Query("SELECT a FROM Appointment a " +
+            "JOIN FETCH a.applicant " +
+            "JOIN FETCH a.timeSlot " +
+            "WHERE a.status = :status ORDER BY a.createdAt ASC")
+    List<Appointment> findByStatusWithDetails(AppointmentStatus status);
 }

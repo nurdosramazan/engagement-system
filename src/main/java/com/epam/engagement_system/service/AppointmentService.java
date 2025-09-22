@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
@@ -43,7 +42,17 @@ public class AppointmentService {
         int historyCount = appointments.size();
 
         return appointments.stream()
-                .map(app -> AppointmentUtil.mapToAppointmentInformationDto(app, historyCount))
+                .map(appointment -> AppointmentUtil.mapToAppointmentInformationDto(appointment, historyCount))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<AppointmentInformationResponse> findAppointmentsByStatus(AppointmentStatus status) {
+        List<Appointment> appointments = appointmentRepository.findByStatusWithDetails(status);
+        int historyCount = appointments.size();
+
+        return appointments.stream()
+                .map(appointment -> AppointmentUtil.mapToAppointmentInformationDto(appointment, historyCount))
                 .collect(Collectors.toList());
     }
 
