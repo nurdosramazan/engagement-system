@@ -2,6 +2,7 @@ package com.epam.engagement_system.controller;
 
 import com.epam.engagement_system.domain.enums.AppointmentStatus;
 import com.epam.engagement_system.dto.ApiResponse;
+import com.epam.engagement_system.dto.admin.AppointmentRejectionRequest;
 import com.epam.engagement_system.dto.admin.SlotGenerationRequest;
 import com.epam.engagement_system.dto.appointment.AppointmentInformationResponse;
 import com.epam.engagement_system.service.AppointmentService;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,5 +45,42 @@ public class AdminController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(new ApiResponse<>(true, "Appointments fetched successfully", appointments));
+    }
+
+    @PostMapping("/appointments/{id}/approve")
+    public ResponseEntity<ApiResponse<Object>> approveAppointment(@PathVariable Long id) {
+        appointmentService.approveAppointment(id);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, "Appointment approved successfully", null));
+    }
+
+    @PostMapping("/appointments/{id}/reject")
+    public ResponseEntity<ApiResponse<Object>> rejectAppointment(@PathVariable Long id,
+                                                                 @Valid @RequestBody AppointmentRejectionRequest request) {
+        appointmentService.rejectAppointment(id, request.reason());
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, "Appointment rejected successfully", null));
+    }
+
+    @PostMapping("/appointments/{id}/complete")
+    public ResponseEntity<ApiResponse<Object>> completeAppointment(@PathVariable Long id) {
+        appointmentService.completeAppointment(id);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, "Appointment marked as completed successfully.", null));
+    }
+
+    @PostMapping("/appointments/{id}/cancel")
+    public ResponseEntity<ApiResponse<Object>> cancelAppointment(@PathVariable Long id) {
+        appointmentService.cancelAppointment(id);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, "Appointment cancelled successfully by admin.", null));
     }
 }

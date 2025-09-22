@@ -109,6 +109,45 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
     }
 
+    @Transactional
+    public void approveAppointment(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found for ID " + appointmentId));
+        validateAppointmentIsPending(appointment.getStatus());
+
+        appointment.setStatus(AppointmentStatus.APPROVED);
+        appointmentRepository.save(appointment);
+    }
+
+    @Transactional
+    public void rejectAppointment(Long appointmentId, String reason) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found for ID " + appointmentId));
+        validateAppointmentIsPending(appointment.getStatus());
+
+        appointment.setStatus(AppointmentStatus.REJECTED);
+        appointment.setRejectionReason(reason);
+
+        TimeSlot timeSlot = appointment.getTimeSlot();
+        if (timeSlot != null) {
+            timeSlot.setAvailable(true);
+        }
+        appointmentRepository.save(appointment);
+    }
+
+    @Transactional
+    public void completeAppointment(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found for ID " + appointmentId));
+
+        if (appointment.getStatus() != AppointmentStatus.APPROVED) {
+            throw new IllegalAppointmentOperationException("Cannot complete appointment that is " + appointment.getStatus());
+        }
+
+        appointment.setStatus(AppointmentStatus.COMPLETED);
+        appointmentRepository.save(appointment);
+    }
+
     private void validateAbleToCreate(Long applicantId) {
         boolean hasPendingOrApproved = appointmentRepository.existsByApplicantIdAndStatusIn(
                 applicantId, List.of(AppointmentStatus.PENDING, AppointmentStatus.APPROVED));
@@ -135,6 +174,12 @@ public class AppointmentService {
     private void validateProfileNotEmpty(ApplicationUser user) {
         if (user.getFirstName() == null || user.getLastName() == null || user.getGender() == null) {
             throw new ProfileIncompleteException("Applicant's first name, last name or gender not provided.");
+        }
+    }
+
+    private void validateAppointmentIsPending(AppointmentStatus status) {
+        if (status != AppointmentStatus.PENDING) {
+            throw new IllegalAppointmentOperationException("Cannot approve/reject appointment that is " + status);
         }
     }
 }
