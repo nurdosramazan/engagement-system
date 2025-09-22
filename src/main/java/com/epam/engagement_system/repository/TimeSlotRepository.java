@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -15,4 +16,6 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
     Set<LocalDateTime> findExistingStartTimes(LocalDateTime start, LocalDateTime end);
 
     List<TimeSlot> findByIsAvailableTrueAndStartTimeBetweenOrderByStartTimeAsc(LocalDateTime start, LocalDateTime end);
+
+    Optional<TimeSlot> findByIdAndIsAvailableTrue(Long id);
 }

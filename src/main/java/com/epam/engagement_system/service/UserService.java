@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -27,11 +29,15 @@ public class UserService {
         ApplicationUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-        user.setFirstName(request.firstName());
-        user.setLastName(request.lastName());
+        user.setFirstName(normalizeName(request.firstName()));
+        user.setLastName(normalizeName(request.lastName()));
         user.setGender(request.gender());
 
         return UserInformationResponse.mapToDto(user);
     }
 
+    private String normalizeName(String name) {
+        name = name.trim().toLowerCase(Locale.ROOT);
+        return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+    }
 }

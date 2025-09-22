@@ -1,6 +1,11 @@
 package com.epam.engagement_system.exception;
 
 import com.epam.engagement_system.dto.ApiResponse;
+import com.epam.engagement_system.dto.appointment.IllegalAppointmentOperationException;
+import com.epam.engagement_system.exception.appointment.ExistingPendingAppointmentException;
+import com.epam.engagement_system.exception.appointment.InvalidWitnessException;
+import com.epam.engagement_system.exception.appointment.TimeSlotNotAvailableException;
+import com.epam.engagement_system.exception.user.ProfileIncompleteException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -30,10 +35,38 @@ public class GlobalExceptionHandler {
                 .body(new ApiResponse<>(false, "Invalid data provided.", fieldErrors));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Object>> handleAllExceptions(Exception ignoredException) {
+    @ExceptionHandler(ExistingPendingAppointmentException.class)
+    public ResponseEntity<ApiResponse<Object>> handleExistingPendingAppointment(ExistingPendingAppointmentException exception) {
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse<>(false, "An unexpected server error occurred.", null));
+                .status(HttpStatus.CONFLICT)
+                .body(new ApiResponse<>(false, exception.getMessage(), null));
+    }
+
+    @ExceptionHandler(ProfileIncompleteException.class)
+    public ResponseEntity<ApiResponse<Object>> handleProfileIncomplete(ProfileIncompleteException exception) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(false, exception.getMessage(), null));
+    }
+
+    @ExceptionHandler(TimeSlotNotAvailableException.class)
+    public ResponseEntity<ApiResponse<Object>> handleTimeSlotNotAvailable(TimeSlotNotAvailableException exception) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ApiResponse<>(false, exception.getMessage(), null));
+    }
+
+    @ExceptionHandler(InvalidWitnessException.class)
+    public ResponseEntity<ApiResponse<Object>> handleInvalidWitness(InvalidWitnessException exception) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(false, exception.getMessage(), null));
+    }
+
+    @ExceptionHandler(IllegalAppointmentOperationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleIllegalAppointmentOperation(IllegalAppointmentOperationException exception) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(false, exception.getMessage(), null));
     }
 }
