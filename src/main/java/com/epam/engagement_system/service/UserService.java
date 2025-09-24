@@ -41,14 +41,16 @@ public class UserService {
         return UserInformationResponse.mapToDto(user);
     }
 
-    //to be refactored
     public void findUserByPhoneNumber(String phoneNumber) {
-        Role userRole = roleRepository.findByName(RoleType.USER)
-                .orElseThrow(() -> new RuntimeException("Error: Default USER role not found."));
+        userRepository.findByPhoneNumber(phoneNumber)
+                .orElseGet(() -> {
+                    Role userRole = roleRepository.findByName(RoleType.USER)
+                            .orElseThrow(() -> new RuntimeException("Error: Default USER role not found."));
 
-        ApplicationUser user = new ApplicationUser(phoneNumber);
-        user.setRoles(Set.of(userRole));
-        userRepository.save(user);
+                    ApplicationUser user = new ApplicationUser(phoneNumber);
+                    user.setRoles(Set.of(userRole));
+                    return userRepository.save(user);
+                });
     }
 
     private String normalizeName(String name) {
