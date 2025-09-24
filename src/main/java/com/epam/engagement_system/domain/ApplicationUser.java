@@ -48,4 +48,8 @@ public class ApplicationUser {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
+
+    public ApplicationUser(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 }

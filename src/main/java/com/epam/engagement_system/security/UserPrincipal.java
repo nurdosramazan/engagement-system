@@ -6,16 +6,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-public class UserPrincipal implements UserDetails, Serializable {
+public class UserPrincipal implements UserDetails {
     @Getter
     private final Long id;
     private final String phoneNumber;
     private final Collection<? extends GrantedAuthority> authorities;
-
 
     public UserPrincipal(Long id, String phoneNumber,
                          Collection<? extends GrantedAuthority> authorities) {

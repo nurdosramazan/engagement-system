@@ -1,20 +1,25 @@
 package com.epam.engagement_system.service;
 
 import com.epam.engagement_system.domain.ApplicationUser;
+import com.epam.engagement_system.domain.Role;
+import com.epam.engagement_system.domain.enums.RoleType;
 import com.epam.engagement_system.dto.user.UpdateProfileRequest;
 import com.epam.engagement_system.dto.user.UserInformationResponse;
 import com.epam.engagement_system.exception.ResourceNotFoundException;
+import com.epam.engagement_system.repository.RoleRepository;
 import com.epam.engagement_system.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Locale;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
     @Transactional(readOnly = true)
     public UserInformationResponse getUserDtoByUserId(Long userId) {
@@ -34,6 +39,16 @@ public class UserService {
         user.setGender(request.gender());
 
         return UserInformationResponse.mapToDto(user);
+    }
+
+    //to be refactored
+    public void findUserByPhoneNumber(String phoneNumber) {
+        Role userRole = roleRepository.findByName(RoleType.USER)
+                .orElseThrow(() -> new RuntimeException("Error: Default USER role not found."));
+
+        ApplicationUser user = new ApplicationUser(phoneNumber);
+        user.setRoles(Set.of(userRole));
+        userRepository.save(user);
     }
 
     private String normalizeName(String name) {

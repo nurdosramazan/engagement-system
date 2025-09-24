@@ -8,7 +8,7 @@ import com.epam.engagement_system.domain.enums.Gender;
 import com.epam.engagement_system.dto.appointment.AppointmentCreationRequest;
 import com.epam.engagement_system.dto.appointment.AppointmentCreationResponse;
 import com.epam.engagement_system.dto.appointment.AppointmentInformationResponse;
-import com.epam.engagement_system.dto.appointment.IllegalAppointmentOperationException;
+import com.epam.engagement_system.exception.appointment.IllegalAppointmentOperationException;
 import com.epam.engagement_system.dto.appointment.TimeSlotInformationResponse;
 import com.epam.engagement_system.exception.ResourceNotFoundException;
 import com.epam.engagement_system.exception.appointment.ExistingPendingAppointmentException;

@@ -1,10 +1,11 @@
 package com.epam.engagement_system.exception;
 
 import com.epam.engagement_system.dto.ApiResponse;
-import com.epam.engagement_system.dto.appointment.IllegalAppointmentOperationException;
+import com.epam.engagement_system.exception.appointment.IllegalAppointmentOperationException;
 import com.epam.engagement_system.exception.appointment.ExistingPendingAppointmentException;
 import com.epam.engagement_system.exception.appointment.InvalidWitnessException;
 import com.epam.engagement_system.exception.appointment.TimeSlotNotAvailableException;
+import com.epam.engagement_system.exception.auth.OTPNotFoundException;
 import com.epam.engagement_system.exception.user.ProfileIncompleteException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +66,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalAppointmentOperationException.class)
     public ResponseEntity<ApiResponse<Object>> handleIllegalAppointmentOperation(IllegalAppointmentOperationException exception) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(false, exception.getMessage(), null));
+    }
+
+    @ExceptionHandler(OTPNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleOTPNotFound(OTPNotFoundException exception) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ApiResponse<>(false, exception.getMessage(), null));
