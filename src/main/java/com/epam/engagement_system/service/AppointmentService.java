@@ -14,6 +14,7 @@ import com.epam.engagement_system.exception.ResourceNotFoundException;
 import com.epam.engagement_system.exception.appointment.ExistingPendingAppointmentException;
 import com.epam.engagement_system.exception.appointment.InvalidWitnessException;
 import com.epam.engagement_system.exception.appointment.TimeSlotNotAvailableException;
+import com.epam.engagement_system.exception.storage.StorageException;
 import com.epam.engagement_system.exception.user.ProfileIncompleteException;
 import com.epam.engagement_system.repository.AppointmentRepository;
 import com.epam.engagement_system.repository.TimeSlotRepository;
@@ -39,6 +40,7 @@ public class AppointmentService {
     private final TimeSlotRepository timeSlotRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final FileStorageService fileStorageService;
 
     private static final Logger logger = LoggerFactory.getLogger(AppointmentService.class);
 
@@ -76,9 +78,10 @@ public class AppointmentService {
     }
 
     @Transactional
-    public AppointmentCreationResponse createAppointment(AppointmentCreationRequest request, MultipartFile ignored, Long applicantId) {
+    public AppointmentCreationResponse createAppointment(AppointmentCreationRequest request, MultipartFile file, Long applicantId) {
         validateAbleToCreate(applicantId);
         validateWitnesses(request.witnesses());
+        validateFileNotEmpty(file);
 
         ApplicationUser applicant = userRepository.findById(applicantId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + applicantId));
@@ -88,7 +91,9 @@ public class AppointmentService {
                 .orElseThrow(() -> new TimeSlotNotAvailableException("Time slot is not available or does not exist."));
         timeSlot.setAvailable(false);
 
-        Appointment appointment = AppointmentUtil.toAppointment(request, applicant, timeSlot);
+        String documentFilename = fileStorageService.store(file);
+
+        Appointment appointment = AppointmentUtil.toAppointment(request, applicant, timeSlot, documentFilename);
         appointmentRepository.save(appointment);
 
         logger.info("New appointment created by {}.", applicant.getPhoneNumber());
@@ -190,6 +195,18 @@ public class AppointmentService {
         notificationService.createAndSendNotification(appointment.getApplicant(), userMessage);
     }
 
+    @Transactional(readOnly = true)
+    public String getAppointmentDocumentPath(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id: " + appointmentId));
+
+        if (appointment.getDocumentPath() == null || appointment.getDocumentPath().isBlank()) {
+            throw new ResourceNotFoundException("No document found for appointment with id: " + appointmentId);
+        }
+
+        return appointment.getDocumentPath();
+    }
+
     private void validateAbleToCreate(Long applicantId) {
         boolean hasPendingOrApproved = appointmentRepository.existsByApplicantIdAndStatusIn(
                 applicantId, List.of(AppointmentStatus.PENDING, AppointmentStatus.APPROVED));
@@ -222,6 +239,12 @@ public class AppointmentService {
     private void validateAppointmentIsPending(AppointmentStatus status) {
         if (status != AppointmentStatus.PENDING) {
             throw new IllegalAppointmentOperationException("Cannot approve/reject appointment that is " + status);
+        }
+    }
+
+    private void validateFileNotEmpty(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new StorageException("A document file is required for the appointment.");
         }
     }
 }

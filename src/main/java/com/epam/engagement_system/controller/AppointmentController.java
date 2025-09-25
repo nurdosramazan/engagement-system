@@ -8,8 +8,11 @@ import com.epam.engagement_system.dto.appointment.TimeSlotInformationResponse;
 import com.epam.engagement_system.security.CurrentUser;
 import com.epam.engagement_system.security.UserPrincipal;
 import com.epam.engagement_system.service.AppointmentService;
+import com.epam.engagement_system.service.FileStorageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +34,7 @@ import java.util.List;
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
+    private final FileStorageService fileStorageService;
 
     @GetMapping("/my-appointments")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
@@ -73,6 +77,17 @@ public class AppointmentController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(new ApiResponse<>(true, "Your appointment has been successfully cancelled.", null));
+    }
+
+    @GetMapping("/{id}/document")
+    @PreAuthorize("hasRole('ADMIN') or @checkPermission.isAppointmentOwner(principal, #id)")
+    public ResponseEntity<Resource> getAppointmentDocument(@PathVariable Long id) {
+        String filename = appointmentService.getAppointmentDocumentPath(id);
+        Resource file = fileStorageService.downloadFile(filename);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
+                .body(file);
     }
 
 }

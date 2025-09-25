@@ -35,7 +35,7 @@ public class AppointmentUtil {
     }
 
     public static Appointment toAppointment(AppointmentCreationRequest request, ApplicationUser user,
-                                            TimeSlot timeSlot) {
+                                            TimeSlot timeSlot, String fileName) {
         if (request == null) return null;
         Appointment appointment = new Appointment();
 
@@ -56,6 +56,7 @@ public class AppointmentUtil {
         appointment.setApplicant(user);
         appointment.setTimeSlot(timeSlot);
         appointment.setNotes(request.notes());
+        appointment.setDocumentPath(fileName);
 
         appointment.setWitness1FirstName(normalizeName(request.witnesses().getFirst().firstName()));
         appointment.setWitness1LastName(normalizeName(request.witnesses().getFirst().lastName()));
@@ -66,7 +67,6 @@ public class AppointmentUtil {
             appointment.setWitness3FirstName(normalizeName(request.witnesses().get(2).firstName()));
             appointment.setWitness3LastName(normalizeName(request.witnesses().get(2).lastName()));
         }
-        appointment.setDocumentPath("/temp");
 
         return appointment;
     }

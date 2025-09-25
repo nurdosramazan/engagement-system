@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class TwilioConfig {
+public class TwilioConfiguration {
 
     @Value("${twilio.account.sid}")
     private String accountSid;

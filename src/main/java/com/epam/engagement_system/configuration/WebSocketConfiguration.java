@@ -25,7 +25,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)
 @RequiredArgsConstructor
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer {
 
     private final JwtService jwtService;
     private final ApplicationUserDetailsService userDetailsService;
