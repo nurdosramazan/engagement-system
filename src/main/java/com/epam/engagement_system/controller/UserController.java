@@ -25,7 +25,7 @@ public class UserController {
     @GetMapping("/me")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<ApiResponse<UserInformationResponse>> getCurrentUser(@CurrentUser UserPrincipal userPrincipal) {
-        UserInformationResponse userProfile = userService.getUserDtoByUserId(userPrincipal.getId());
+        UserInformationResponse userProfile = userService.findById(userPrincipal.getId());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -37,6 +37,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserInformationResponse>> updateCurrentUserProfile(@CurrentUser UserPrincipal userPrincipal,
                                                                                      @Valid @RequestBody UpdateProfileRequest request) {
         UserInformationResponse userProfile = userService.updateUserProfile(userPrincipal.getId(), request);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(new ApiResponse<>(true, "Profile updated successfully", userProfile));

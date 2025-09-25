@@ -17,11 +17,12 @@ public class TwilioSmsService {
     private String fromPhoneNumber;
 
     @Async("asyncExecutor")
-    public void sendMessage(String recipient, String messageBody) {
+    public void sendMessageAsync(String recipient, String messageBody) {
         try {
             PhoneNumber to = new PhoneNumber(recipient);
             PhoneNumber from = new PhoneNumber(fromPhoneNumber);
             Message message = Message.creator(to, from, messageBody).create();
+
             if (message.getStatus() == Message.Status.FAILED || message.getStatus() == Message.Status.CANCELED) {
                 logger.error("Twilio failed to send SMS to {}. Status: {}, Error: {}", recipient, message.getStatus(), message.getErrorMessage());
             } else {

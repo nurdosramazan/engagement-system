@@ -35,7 +35,7 @@ public class AppointmentController {
     @GetMapping("/my-appointments")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<ApiResponse<List<AppointmentInformationResponse>>> getMyAppointments(@CurrentUser UserPrincipal userPrincipal) {
-        List<AppointmentInformationResponse> myAppointments = appointmentService.findAppointmentsByUserId(userPrincipal.getId());
+        List<AppointmentInformationResponse> myAppointments = appointmentService.findByUserId(userPrincipal.getId());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -46,7 +46,7 @@ public class AppointmentController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<ApiResponse<List<TimeSlotInformationResponse>>> getAvailableTimeSlots(@RequestParam int year,
                                                                                                 @RequestParam int month) {
-        List<TimeSlotInformationResponse> availableSlots = appointmentService.getAvailableTimeSlotsDto(year, month);
+        List<TimeSlotInformationResponse> availableSlots = appointmentService.getAvailableTimeSlots(year, month);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

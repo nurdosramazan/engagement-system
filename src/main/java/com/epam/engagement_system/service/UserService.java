@@ -17,7 +17,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public UserInformationResponse getUserDtoByUserId(Long userId) {
+    public UserInformationResponse findById(Long userId) {
         ApplicationUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 

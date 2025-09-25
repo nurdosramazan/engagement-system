@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,11 +38,12 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     private static final Logger logger = LoggerFactory.getLogger(AppointmentService.class);
 
     @Transactional(readOnly = true)
-    public List<AppointmentInformationResponse> findAppointmentsByUserId(Long userId) {
+    public List<AppointmentInformationResponse> findByUserId(Long userId) {
         List<Appointment> appointments = appointmentRepository.findByApplicantId(userId);
         int historyCount = appointments.size();
 
@@ -51,7 +53,7 @@ public class AppointmentService {
     }
 
     @Transactional(readOnly = true)
-    public List<AppointmentInformationResponse> findAppointmentsByStatus(AppointmentStatus status) {
+    public List<AppointmentInformationResponse> findByStatus(AppointmentStatus status) {
         List<Appointment> appointments = appointmentRepository.findByStatusWithDetails(status);
         int historyCount = appointments.size();
 
@@ -60,7 +62,7 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
-    public List<TimeSlotInformationResponse> getAvailableTimeSlotsDto(int year, int month) {
+    public List<TimeSlotInformationResponse> getAvailableTimeSlots(int year, int month) {
         YearMonth yearMonth = YearMonth.of(year, month);
         LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
         LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(23, 59, 59);
@@ -68,7 +70,8 @@ public class AppointmentService {
         return timeSlotRepository
                 .findByIsAvailableTrueAndStartTimeBetweenOrderByStartTimeAsc(startOfMonth, endOfMonth)
                 .stream()
-                .map(TimeSlotInformationResponse::mapToDto)
+                .map(timeSlot -> new TimeSlotInformationResponse(
+                        timeSlot.getId(), timeSlot.getStartTime(), timeSlot.getEndTime()))
                 .toList();
     }
 
@@ -90,6 +93,13 @@ public class AppointmentService {
 
         logger.info("New appointment created by {}.", applicant.getPhoneNumber());
 
+        String userMessage = "Your appointment for " + timeSlot.getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
+                " was sent for verification. Please wait for reply.";
+        notificationService.createAndSendNotification(applicant, userMessage);
+
+        String adminMessage = String.format("New application from %s arrived.", applicant.getPhoneNumber());
+        notificationService.createAndSendAdminNotifications(adminMessage);
+
         return new AppointmentCreationResponse(
                 appointment.getId(),
                 appointment.getStatus().name(),
@@ -109,11 +119,16 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.CANCELLED);
 
         TimeSlot timeSlot = appointment.getTimeSlot();
+        String formattedDate = "?";
         if (timeSlot != null) {
             timeSlot.setAvailable(true);
+            formattedDate = timeSlot.getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
         }
         appointmentRepository.save(appointment);
         logger.info("Appointment {} was cancelled.", appointmentId);
+
+        String userMessage = String.format("Your appointment for %s has been cancelled.", formattedDate);
+        notificationService.createAndSendNotification(appointment.getApplicant(), userMessage);
     }
 
     @Transactional
@@ -125,6 +140,10 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.APPROVED);
         appointmentRepository.save(appointment);
         logger.info("Appointment {} was approved", appointmentId);
+
+        String formattedDate = appointment.getTimeSlot().getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+        String userMessage = String.format("Your appointment for %s was approved!", formattedDate);
+        notificationService.createAndSendNotification(appointment.getApplicant(), userMessage);
     }
 
     @Transactional
@@ -137,11 +156,20 @@ public class AppointmentService {
         appointment.setRejectionReason(reason);
 
         TimeSlot timeSlot = appointment.getTimeSlot();
+        String formattedDate = "?";
         if (timeSlot != null) {
             timeSlot.setAvailable(true);
+            formattedDate = timeSlot.getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
         }
         appointmentRepository.save(appointment);
         logger.info("Appointment {} was rejected", appointmentId);
+
+        String userMessage = String.format(
+                "Unfortunately, your application for %s was rejected for the following reason: %s",
+                formattedDate,
+                reason
+        );
+        notificationService.createAndSendNotification(appointment.getApplicant(), userMessage);
     }
 
     @Transactional
@@ -156,6 +184,10 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.COMPLETED);
         appointmentRepository.save(appointment);
         logger.info("Appointment {} was completed", appointmentId);
+
+        String formattedDate = appointment.getTimeSlot().getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+        String userMessage = String.format("Congratulations! Your appointment for %s was competed successfully!", formattedDate);
+        notificationService.createAndSendNotification(appointment.getApplicant(), userMessage);
     }
 
     private void validateAbleToCreate(Long applicantId) {

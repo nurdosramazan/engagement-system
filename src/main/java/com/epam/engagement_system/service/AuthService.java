@@ -1,6 +1,7 @@
 package com.epam.engagement_system.service;
 
 import com.epam.engagement_system.dto.auth.OTPVerificationRequest;
+import com.epam.engagement_system.dto.auth.OTPVerificationResponse;
 import com.epam.engagement_system.exception.auth.OTPNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -31,12 +32,12 @@ public class AuthService {
         otpStore.put(phoneNumber,new OTPEntity(otp, Instant.now().plusSeconds(300)));
 
         String message = "Your code for login: " + otp;
-        twilioSmsService.sendMessage(phoneNumber, message);
+        twilioSmsService.sendMessageAsync(phoneNumber, message);
         logger.info("Request for OTP code for {} was sent to Twilio API.", phoneNumber);
     }
 
     @Transactional
-    public String verifyOtpAndLogin(OTPVerificationRequest request) {
+    public OTPVerificationResponse verifyOtpAndLogin(OTPVerificationRequest request) {
         String phoneNumber = request.phoneNumber();
         String submittedOtp = request.otp();
 
@@ -51,7 +52,8 @@ public class AuthService {
                 userDetails, null, userDetails.getAuthorities());
 
         logger.info("User {} successfully verified OTP. Generating JWT token.", phoneNumber);
-        return jwtService.generateJwtToken(authentication);
+        String jwtToken = jwtService.generateJwtToken(authentication);
+        return new OTPVerificationResponse(jwtToken, "Bearer");
     }
 
     private record OTPEntity(String code, Instant expiresAt) {}

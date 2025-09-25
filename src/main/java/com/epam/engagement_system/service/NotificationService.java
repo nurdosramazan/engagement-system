@@ -69,7 +69,7 @@ public class NotificationService {
         logger.info("Asynchronously sending notification {} to websocket and SMS", notification.getId());
 
         messagingTemplate.convertAndSendToUser(phoneNumber, "/queue/notifications", notification);
-        twilioSmsService.sendMessage(phoneNumber, notification.getMessage());
+        twilioSmsService.sendMessageAsync(phoneNumber, notification.getMessage());
     }
 
 

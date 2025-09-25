@@ -42,7 +42,7 @@ public class AdminController {
     public ResponseEntity<ApiResponse<List<AppointmentInformationResponse>>> getAppointmentByStatus(
             @RequestParam(defaultValue = "PENDING") AppointmentStatus status)
     {
-        List<AppointmentInformationResponse> appointments = appointmentService.findAppointmentsByStatus(status);
+        List<AppointmentInformationResponse> appointments = appointmentService.findByStatus(status);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

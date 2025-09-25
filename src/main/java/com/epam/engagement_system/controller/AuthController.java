@@ -31,8 +31,7 @@ public class AuthController {
 
     @PostMapping("/verify-otp")
     public ResponseEntity<ApiResponse<OTPVerificationResponse>> verifyOTP(@Valid @RequestBody OTPVerificationRequest request) {
-        String jwtToken = authService.verifyOtpAndLogin(request);
-        OTPVerificationResponse authResponse = new OTPVerificationResponse(jwtToken, "Bearer");
+        OTPVerificationResponse authResponse = authService.verifyOtpAndLogin(request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
