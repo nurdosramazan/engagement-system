@@ -3,6 +3,8 @@ package com.epam.engagement_system.service;
 import com.epam.engagement_system.domain.TimeSlot;
 import com.epam.engagement_system.repository.TimeSlotRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,8 @@ public class TimeSlotService {
     private static final LocalTime FRIDAY_LUNCH_START = LocalTime.of(12, 30);
     private static final LocalTime FRIDAY_LUNCH_END = LocalTime.of(14, 0);
     private static final long SLOT_DURATION_MINUTES = 30;
+
+    private static final Logger logger = LoggerFactory.getLogger(TimeSlotService.class);
     @Transactional
     public String generateSlotsForMonth(int year, int month) {
         YearMonth yearMonth = YearMonth.of(year, month);
@@ -73,9 +77,11 @@ public class TimeSlotService {
         if (!newSlots.isEmpty()) {
             timeSlotRepository.saveAll(newSlots);
         }
-        return String.format(
-                "Successfully generated %d new time slots for %d-%02d.", newSlots.size(), year, month
-        );
+
+        String successMessage = String.format(
+                "Successfully generated %d new time slots for %d-%02d.", newSlots.size(), year, month);
+        logger.info(successMessage);
+        return successMessage;
     }
 
     private boolean isDuringLunchBreak(DayOfWeek dayOfWeek, LocalTime start, LocalTime end) {

@@ -3,6 +3,8 @@ package com.epam.engagement_system.service;
 import com.epam.engagement_system.dto.auth.OTPVerificationRequest;
 import com.epam.engagement_system.exception.auth.OTPNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AuthService {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-
+    private final TwilioSmsService twilioSmsService;
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
     private final Map<String, OTPEntity> otpStore = new ConcurrentHashMap<>();
 
     public void requestOTP(String phoneNumber) {
@@ -28,8 +31,8 @@ public class AuthService {
         otpStore.put(phoneNumber,new OTPEntity(otp, Instant.now().plusSeconds(300)));
 
         String message = "Your code for login: " + otp;
-        //someService.sendMessage(phoneNumber, message);
-        System.out.println(message);
+        twilioSmsService.sendMessage(phoneNumber, message);
+        logger.info("Request for OTP code for {} was sent to Twilio API.", phoneNumber);
     }
 
     @Transactional
@@ -47,6 +50,7 @@ public class AuthService {
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());
 
+        logger.info("User {} successfully verified OTP. Generating JWT token.", phoneNumber);
         return jwtService.generateJwtToken(authentication);
     }
 

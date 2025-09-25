@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -23,4 +24,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "JOIN FETCH a.timeSlot " +
             "WHERE a.status = :status ORDER BY a.createdAt ASC")
     List<Appointment> findByStatusWithDetails(AppointmentStatus status);
+
+    @Query("SELECT a FROM Appointment a JOIN FETCH a.applicant JOIN FETCH a.timeSlot " +
+            "WHERE a.status = 'APPROVED' AND a.reminderSent = false AND a.timeSlot.startTime > :now " +
+            "AND a.timeSlot.startTime <= :limit")
+    List<Appointment> findAppointmentsForReminder(LocalDateTime now, LocalDateTime limit);
 }

@@ -20,6 +20,8 @@ import com.epam.engagement_system.repository.TimeSlotRepository;
 import com.epam.engagement_system.repository.UserRepository;
 import com.epam.engagement_system.util.AppointmentUtil;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +37,8 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final UserRepository userRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(AppointmentService.class);
 
     @Transactional(readOnly = true)
     public List<AppointmentInformationResponse> findAppointmentsByUserId(Long userId) {
@@ -84,6 +88,8 @@ public class AppointmentService {
         Appointment appointment = AppointmentUtil.toAppointment(request, applicant, timeSlot);
         appointmentRepository.save(appointment);
 
+        logger.info("New appointment created by {}.", applicant.getPhoneNumber());
+
         return new AppointmentCreationResponse(
                 appointment.getId(),
                 appointment.getStatus().name(),
@@ -107,6 +113,7 @@ public class AppointmentService {
             timeSlot.setAvailable(true);
         }
         appointmentRepository.save(appointment);
+        logger.info("Appointment {} was cancelled.", appointmentId);
     }
 
     @Transactional
@@ -117,6 +124,7 @@ public class AppointmentService {
 
         appointment.setStatus(AppointmentStatus.APPROVED);
         appointmentRepository.save(appointment);
+        logger.info("Appointment {} was approved", appointmentId);
     }
 
     @Transactional
@@ -133,6 +141,7 @@ public class AppointmentService {
             timeSlot.setAvailable(true);
         }
         appointmentRepository.save(appointment);
+        logger.info("Appointment {} was rejected", appointmentId);
     }
 
     @Transactional
@@ -146,6 +155,7 @@ public class AppointmentService {
 
         appointment.setStatus(AppointmentStatus.COMPLETED);
         appointmentRepository.save(appointment);
+        logger.info("Appointment {} was completed", appointmentId);
     }
 
     private void validateAbleToCreate(Long applicantId) {
