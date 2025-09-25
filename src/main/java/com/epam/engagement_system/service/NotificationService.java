@@ -6,7 +6,6 @@ import com.epam.engagement_system.domain.enums.RoleType;
 import com.epam.engagement_system.dto.NotificationResponse;
 import com.epam.engagement_system.repository.NotificationRepository;
 import com.epam.engagement_system.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -18,14 +17,24 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class NotificationService {
-    @Lazy
     private final NotificationService self;
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final TwilioSmsService twilioSmsService;
+
+    public NotificationService(@Lazy NotificationService self,
+                               NotificationRepository notificationRepository,
+                               UserRepository userRepository,
+                               SimpMessagingTemplate messagingTemplate,
+                               TwilioSmsService twilioSmsService) {
+        this.self = self;
+        this.notificationRepository = notificationRepository;
+        this.userRepository = userRepository;
+        this.messagingTemplate = messagingTemplate;
+        this.twilioSmsService = twilioSmsService;
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
