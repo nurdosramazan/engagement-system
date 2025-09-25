@@ -3,11 +3,14 @@ package com.epam.engagement_system.controller;
 import com.epam.engagement_system.dto.ApiResponse;
 import com.epam.engagement_system.dto.user.UpdateProfileRequest;
 import com.epam.engagement_system.dto.user.UserInformationResponse;
+import com.epam.engagement_system.security.CurrentUser;
+import com.epam.engagement_system.security.UserPrincipal;
 import com.epam.engagement_system.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,9 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     private final UserService userService;
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserInformationResponse>> getCurrentUser(Object ignored) {
-        //get user id from the request
-        UserInformationResponse userProfile = userService.getUserDtoByUserId(1L);
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<UserInformationResponse>> getCurrentUser(@CurrentUser UserPrincipal userPrincipal) {
+        UserInformationResponse userProfile = userService.getUserDtoByUserId(userPrincipal.getId());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -30,10 +33,10 @@ public class UserController {
     }
 
     @PutMapping("/me/update-info")
-    public ResponseEntity<ApiResponse<UserInformationResponse>> updateCurrentUserProfile(Object ignored,
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<UserInformationResponse>> updateCurrentUserProfile(@CurrentUser UserPrincipal userPrincipal,
                                                                                      @Valid @RequestBody UpdateProfileRequest request) {
-        //get user id from the request
-        UserInformationResponse userProfile = userService.updateUserProfile(1L, request);
+        UserInformationResponse userProfile = userService.updateUserProfile(userPrincipal.getId(), request);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(new ApiResponse<>(true, "Profile updated successfully", userProfile));
