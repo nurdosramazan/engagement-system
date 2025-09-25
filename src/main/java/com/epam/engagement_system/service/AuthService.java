@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final UserService userService;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
@@ -43,9 +42,6 @@ public class AuthService {
             throw new OTPNotFoundException("The code is not valid or has expired. Please try again.");
         }
         otpStore.remove(phoneNumber);
-
-        userService.findUserByPhoneNumber(phoneNumber);
-        //todo: refactor
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(phoneNumber);
         Authentication authentication = new UsernamePasswordAuthenticationToken(
