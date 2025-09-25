@@ -27,7 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -205,6 +207,26 @@ public class AppointmentService {
         }
 
         return appointment.getDocumentPath();
+    }
+
+    public List<Appointment> getAppointmentsForReport(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null) {
+            startDate = LocalDate.of(2025, 9, 1);
+            logger.warn("Start date is null, setting to {}", startDate);
+        }
+        if (endDate == null) {
+            endDate = LocalDate.now();
+            logger.warn("End date is null, setting to {}", endDate);
+        }
+
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("Start date cannot be after end date.");
+        }
+
+        List<Appointment> appointments = appointmentRepository.findAllWithTimeSlotBetween(
+                startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX));
+        logger.info("Successfully fetched list of appointments from {} till {}", startDate, endDate);
+        return appointments;
     }
 
     private void validateAbleToCreate(Long applicantId) {

@@ -7,9 +7,14 @@ import com.epam.engagement_system.dto.admin.SlotGenerationRequest;
 import com.epam.engagement_system.dto.appointment.AppointmentInformationResponse;
 import com.epam.engagement_system.service.AppointmentService;
 import com.epam.engagement_system.service.TimeSlotService;
+import com.epam.engagement_system.service.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -29,6 +35,7 @@ import java.util.List;
 public class AdminController {
     private final TimeSlotService timeSlotService;
     private final AppointmentService appointmentService;
+    private final ReportService reportService;
     @PostMapping("/time-slots/generate")
     public ResponseEntity<ApiResponse<Object>> generateTimeSlots(@Valid @RequestBody SlotGenerationRequest request) {
         String message = timeSlotService.generateSlotsForMonth(request.year(), request.month());
@@ -84,5 +91,22 @@ public class AdminController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(new ApiResponse<>(true, "Appointment cancelled successfully by admin.", null));
+    }
+
+    @GetMapping("/reports/appointments.{format}")
+    public ResponseEntity<InputStreamResource> getAppointmentReport(
+            @PathVariable String format,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate)
+    {
+        ReportService.Report report = reportService.generateReport(format, startDate, endDate);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "inline; filename=\"" + report.fileName() + "\"");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .headers(headers)
+                .contentType(MediaType.parseMediaType(report.contentType()))
+                .body(new InputStreamResource(report.stream()));
     }
 }

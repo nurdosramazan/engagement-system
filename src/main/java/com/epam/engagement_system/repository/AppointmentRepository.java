@@ -29,4 +29,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "WHERE a.status = 'APPROVED' AND a.reminderSent = false AND a.timeSlot.startTime > :now " +
             "AND a.timeSlot.startTime <= :limit")
     List<Appointment> findAppointmentsForReminder(LocalDateTime now, LocalDateTime limit);
+
+    @Query("SELECT a FROM Appointment a " +
+            "JOIN FETCH a.timeSlot " +
+            "JOIN FETCH a.applicant " +
+            "WHERE a.timeSlot.startTime BETWEEN :start AND :end " +
+            "ORDER BY a.id ASC")
+    List<Appointment> findAllWithTimeSlotBetween(LocalDateTime start, LocalDateTime end);
 }
