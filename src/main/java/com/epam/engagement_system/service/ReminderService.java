@@ -21,7 +21,7 @@ public class ReminderService {
     private static final Logger logger = LoggerFactory.getLogger(ReminderService.class);
     private static final String address = "Mangilik el STREET, 65";
 
-    @Scheduled(cron = "0 0 * * * ?") //need to adjust
+    @Scheduled(cron = "0 0 * * * ?")
     @Transactional
     public void sendAppointmentReminders() {
         LocalDateTime now = LocalDateTime.now();

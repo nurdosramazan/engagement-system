@@ -29,11 +29,11 @@ public class AuthService {
 
     public void requestOTP(String phoneNumber) {
         String otp = String.format("%06d", new SecureRandom().nextInt(1_000_000));
-        otpStore.put(phoneNumber,new OTPEntity(otp, Instant.now().plusSeconds(300)));
+        otpStore.put(phoneNumber, new OTPEntity(otp, Instant.now().plusSeconds(300)));
 
         String message = "Your code for login: " + otp;
         twilioSmsService.sendMessageAsync(phoneNumber, message);
-        logger.info("Request for OTP code for {} was sent to Twilio API.", phoneNumber);
+        logger.info("Request for OTP code {} for {} was sent to Twilio API.", otp, phoneNumber);
     }
 
     @Transactional
@@ -56,5 +56,5 @@ public class AuthService {
         return new OTPVerificationResponse(jwtToken, "Bearer");
     }
 
-    private record OTPEntity(String code, Instant expiresAt) {}
+    record OTPEntity(String code, Instant expiresAt) {}
 }

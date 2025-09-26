@@ -42,7 +42,7 @@ public class PdfReportGenerator implements ReportGenerator {
             document.add(new Paragraph("Generated on: " + LocalDateTime.now().format(DATE_TIME_FORMATTER))
                     .setTextAlignment(TextAlignment.CENTER).setFontSize(10).setItalic());
 
-            Table table = new Table(UnitValue.createPercentArray(new float[]{1, 3, 3, 3, 2, 2, 4, 4}));
+            Table table = new Table(UnitValue.createPercentArray(new float[]{2, 4, 4, 5, 5, 3, 5, 5, 5, 6, 6}));
             table.setWidth(UnitValue.createPercentValue(100));
 
             table.addHeaderCell(createHeaderCell("ID"));
@@ -66,7 +66,8 @@ public class PdfReportGenerator implements ReportGenerator {
                 table.addCell(new Cell().add(new Paragraph(app.getStatus().name())).setFontSize(8));
                 table.addCell(new Cell().add(new Paragraph(app.getWitness1FirstName() + " " + app.getWitness1LastName())).setFontSize(8));
                 table.addCell(new Cell().add(new Paragraph(app.getWitness2FirstName() + " " + app.getWitness2LastName())).setFontSize(8));
-                table.addCell(new Cell().add(new Paragraph(app.getWitness3FirstName() + " " + app.getWitness3LastName())).setFontSize(8));
+                String witness3 = app.getWitness3FirstName() != null ? app.getWitness3FirstName() + " " + app.getWitness3LastName() : "";
+                table.addCell(new Cell().add(new Paragraph(witness3)).setFontSize(8));
                 table.addCell(new Cell().add(new Paragraph(app.getNotes() != null ? app.getNotes() : "")).setFontSize(8));
                 table.addCell(new Cell().add(new Paragraph(app.getRejectionReason() != null ? app.getRejectionReason() : "")).setFontSize(8));
             }
