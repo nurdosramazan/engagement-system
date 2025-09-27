@@ -86,12 +86,13 @@ class NotificationServiceTest {
         @Test
         @DisplayName("sendUserNotificationAsync should send notificatons to websocket and SMS messages")
         void sendUserNotificationAsync_ShouldSendWsAndSms() {
-            notificationService.sendUserNotificationAsync(testNotification, testUser.getPhoneNumber());
+            NotificationResponse response = new NotificationResponse(testNotification.getId(), testNotification.getMessage(), testNotification.isRead(), testNotification.getCreatedAt());
+            notificationService.sendUserNotificationAsync(response, testUser.getPhoneNumber());
 
             verify(messagingTemplate).convertAndSendToUser(
                     eq(testUser.getPhoneNumber()),
                     eq("/queue/notifications"),
-                    eq(testNotification)
+                    eq(response)
             );
             verify(twilioSmsService).sendMessageAsync(testUser.getPhoneNumber(), testNotification.getMessage());
         }

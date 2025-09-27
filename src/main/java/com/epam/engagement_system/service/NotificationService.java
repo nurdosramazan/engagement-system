@@ -50,8 +50,10 @@ public class NotificationService {
 
     public void createAndSendNotification(ApplicationUser user, String message) {
         Notification notification = self.saveNotification(user, message);
-
-        self.sendUserNotificationAsync(notification, user.getPhoneNumber());
+        NotificationResponse response = new NotificationResponse(
+                notification.getId(), notification.getMessage(), notification.isRead(), notification.getCreatedAt()
+        );
+        self.sendUserNotificationAsync(response, user.getPhoneNumber());
         logger.info("Notification for user {} was created. Requested sending.", user.getId());
     }
 
@@ -74,11 +76,11 @@ public class NotificationService {
     }
 
     @Async("asyncExecutor")
-    public void sendUserNotificationAsync(Notification notification, String phoneNumber) {
-        logger.info("Asynchronously sending notification {} to websocket and SMS", notification.getId());
+    public void sendUserNotificationAsync(NotificationResponse notification, String phoneNumber) {
+        logger.info("Asynchronously sending notification {} to websocket and SMS", notification.id());
 
         messagingTemplate.convertAndSendToUser(phoneNumber, "/queue/notifications", notification);
-        twilioSmsService.sendMessageAsync(phoneNumber, notification.getMessage());
+        twilioSmsService.sendMessageAsync(phoneNumber, notification.message());
     }
 
 
