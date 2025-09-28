@@ -33,7 +33,7 @@ public class AuthService {
 
         String message = "Your code for login: " + otp;
         twilioSmsService.sendMessageAsync(phoneNumber, message);
-        logger.info("Request for OTP code was sent to Twilio API."); .
+        logger.info("Request for OTP code was sent to Twilio API.");
     }
 
     @Transactional
