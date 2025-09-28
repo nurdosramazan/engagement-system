@@ -24,12 +24,12 @@ public class TwilioSmsService {
             Message message = Message.creator(to, from, messageBody).create();
 
             if (message.getStatus() == Message.Status.FAILED || message.getStatus() == Message.Status.CANCELED) {
-                logger.error("Twilio failed to send SMS to {}. Status: {}, Error: {}", recipient, message.getStatus(), message.getErrorMessage());
+                logger.error("Twilio failed to send SMS to the phone number. Status: {}, Error: {}", message.getStatus(), message.getErrorMessage());
             } else {
-                logger.info("Twilio successfully send message to {}", recipient);
+                logger.info("Twilio successfully send message to the phone number");
             }
         } catch (Exception e) {
-            logger.error("Failed to send SMS message to {}: {}", recipient, e.getMessage(), e);
+            logger.error("Failed to send SMS message to the phone number: {}", e.getMessage(), e);
         }
     }
 }

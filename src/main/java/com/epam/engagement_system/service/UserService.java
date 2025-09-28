@@ -37,6 +37,7 @@ public class UserService {
     }
 
     private String normalizeName(String name) {
+        if (name == null) return null;
         name = name.trim().toLowerCase(Locale.ROOT);
         return Character.toUpperCase(name.charAt(0)) + name.substring(1);
     }
