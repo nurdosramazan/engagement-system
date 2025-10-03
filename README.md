@@ -1,3 +1,4 @@
-# engagement-system
-Capstone for EPAM Java. Project topic - Engagement appointment system for the Astana Grand mosque.
-front end repository - https://github.com/nurdosramazan/engagement-system-frontend
+# Engagement system for Astana Grand Mosque
+This app was made to simplify the process of scheduling Islamic engagement at the Astana Grand mosque located in Astana, Kazakhstan. This app can provide easiness, first of all, to the staff at the mosque. Steps for conducting engagements were manual and not effective, since a lot of human factors make things difficult for the workers: people need to come to the counter physically; workers need to write information down; verify certificates; thousands of people over the country communicate with mosque employees using messengers and request to postpone their arrangements which causes conflicts and other issues. For the administrative side, the app can be a centeralized tool to manage all these applications at different stages and maintain records. For the engaged couples, it provides an online service without phone calls and physical visits.
+
+Front end repository - https://github.com/nurdosramazan/engagement-system-frontend
